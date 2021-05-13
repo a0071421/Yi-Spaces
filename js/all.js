@@ -10,12 +10,14 @@ Vue.component("pagination", {
   template: "#pagination-component",
   props: ["paginationInfo"],
   data() {
-    return {};
+    return {
+      pagination: this.paginationInfo,
+    };
   },
   methods: {
     changeData(page) {
-      this.paginationInfo.currentPage = page - 1;
-      this.$emit("changepage", this.paginationInfo.currentPage);
+      this.pagination.currentPage = page - 1;
+      this.$emit("changepage", this.pagination.currentPage);
     },
   },
 });
@@ -30,7 +32,6 @@ new Vue({
     country: {},
     sort: null,
     search: "",
-    currentPage: 0,
   },
   methods: {
     getCountries() {
@@ -45,22 +46,10 @@ new Vue({
       const vm = this;
       if (vm.sort) {
         // 小到大
-        if (a.name < b.name) {
-          return -1;
-        }
-        if (a.name > b.name) {
-          return 1;
-        }
-        return 0;
+        return a.name > b.name ? 1 : -1;
       } else {
         // 大到小
-        if (a.name > b.name) {
-          return -1;
-        }
-        if (a.name < b.name) {
-          return 1;
-        }
-        return 0;
+        return a.name < b.name ? 1 : -1;
       }
     },
     findCountry() {
@@ -94,11 +83,12 @@ new Vue({
       vm.pageCountries = newData;
       vm.filterCountries = vm.pageCountries[0] || [];
       vm.pagination = {
-        currentPage: vm.currentPage,
+        currentPage: 0,
         dataPage: vm.pageCountries.length,
       };
     },
     newPageData(page) {
+      this.pagination.currentPage = page;
       this.filterCountries = this.pageCountries[page];
     },
   },
