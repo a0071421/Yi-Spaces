@@ -17,7 +17,7 @@
   <title>國家目錄</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
     integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+  <script src="https://kit.fontawesome.com/b205f24a95.js" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="/css/all.css">
 </head>
 
@@ -29,13 +29,16 @@
           <div class="d-flex justify-content-end mb-3">
             <div class="search">
               <input type="text" class="search-text" placeholder="請輸入國名" v-model="search">
-              <button type="button" class="search-icon" @click="findCountry"><i class="bi bi-search"></i></button>
+              <button type="button" class="search-icon" @click="findCountry"><i class="fas fa-search"></i></button>
             </div>
             <button class="btn btn-outline-primary" @click="filterCountries.sort(compare), sort = !sort"><span
                 class="mr-1">國名</span>
-              <i v-if="sort === null" class="bi bi-arrow-down-up"></i>
-              <i v-else-if="sort" class="bi bi-arrow-up"></i>
-              <i v-else-if="!sort" class="bi bi-arrow-down"></i>
+              <span v-if="sort === null"><i class="fas fa-long-arrow-alt-up"></i><i
+                  class="fas fa-long-arrow-alt-down"></i></span>
+              <template v-else>
+                <i v-if="sort" class="fas fa-long-arrow-alt-up"></i>
+                <i v-else-if="!sort" class="fas fa-long-arrow-alt-down"></i>
+              </template>
             </button>
           </div>
         </div>
