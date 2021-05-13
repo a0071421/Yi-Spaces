@@ -25,28 +25,288 @@
     <div class="container">
       <div class="row">
         <div class="col">
-          <div class="features d-flex">
-            <span>國名排序</span>
-            <div class="input-group mb-3">
-              <input type="text" class="form-control" placeholder="Recipient's username">
-              <div class="input-group-append">
-                <button class="btn btn-outline-secondary" type="button">Button</button>
+          <div class="d-flex justify-content-end mb-3">
+            <div class="search">
+              <input type="text" class="search-text" placeholder="請輸入國名" v-model="search">
+              <button type="button" class="search-icon" @click="findCountry"><i class="bi bi-search"></i></button>
+            </div>
+            <button class="btn btn-outline-primary" @click="filterCountries.sort(compare), sort = !sort"><span
+                class="mr-1">國名</span>
+              <i v-if="sort === null" class="bi bi-arrow-down-up"></i>
+              <i v-else-if="sort" class="bi bi-arrow-up"></i>
+              <i v-else-if="!sort" class="bi bi-arrow-down"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div v-for="(item,i) in filterCountries" :key="item.alpha3Code" class="col-md-4 mb-2">
+          <div class="card h-100 border-0" data-toggle="modal" data-target="#countryModal" @click="country = item">
+            <div class="rounded-top bg-cover" style="height: 200px;" :style="{ backgroundImage: `url(${item.flag})` }">
+            </div>
+            <div class="card-body">
+              <h5 class="card-title">{{item.name}}</h5>
+              <p class="card-text">國家代碼(2位): {{item.alpha2Code}}</p>
+              <p class="card-text">國家代碼(3位):
+                {{item.alpha3Code}}</p>
+              <p class="card-text">母語名稱: {{item.nativeName}}</p>
+              <div class="altSpellings mb-1">
+                <span>替代國家名稱: </span>
+                <span v-for="(spelling, i) in item.altSpellings" :key="i">
+                  {{spelling}}
+                  <span v-if="i + 1 !== item.altSpellings.length">、</span>
+                </span>
+              </div>
+              <p class="card-text" v-if="item.callingCodes"> 國際電話區號: {{item.callingCodes[0]}}</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="row justify-content-center">
+        <div class="col-12">
+          <div v-if="filterCountries.length === 0 && search != ''" class="text-center">
+            <h3 class="py-4">目前無此商品哦</h3>
+          </div>
+        </div>
+        <div class="col-12">
+          <pagination :pagination-info="pagination" @changePage="newPageData"></pagination>
+        </div>
+      </div>
+
+    </div>
+    <country-modal :country="country"></country-modal>
+  </div>
+  <script type="text/x-template" id="country-component">
+    <div v-if="Object.keys(country).length" class="modal fade" id="countryModal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <div class="d-flex align-items-center">
+              <div class="rounded bg-cover mr-1" style="width:40px; height: 40px;" :style="{ backgroundImage: `url(${country.flag})` }"></div>
+              <h5 class="modal-title" id="exampleModalLabel">國家詳細資訊: {{country.name}}</h5>
+            </div>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="container">
+              <div class="row mb-3">
+                <div class="col-4">
+                  <div class="border-bottom-dotted h-100 d-flex flex-column justify-content-between">
+                    <h5>替代國家名稱</h5>
+                    <div>
+                      <span v-for="(item, i) in country.altSpellings" :key="i">{{item}}
+                        <span v-if="i + 1 !== country.altSpellings.length">、</span>
+                      </span>
+                    </div>               
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="border-bottom-dotted h-100 d-flex flex-column justify-content-between">
+                    <h5>母語名稱</h5>
+                    <span>{{country.nativeName}}</span>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="border-bottom-dotted h-100 d-flex flex-column justify-content-between">
+                  <h5>國家域名</h5>
+                  <div>
+                    <span v-for="(item, i) in country.topLevelDomain" :key="i">{{item}}
+                      <span v-if="i + 1 !== country.topLevelDomain.length">、</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+              </div>
+              <div class="row mb-3">
+                <div class="col-4">
+                  <div class="border-bottom-dotted h-100 d-flex flex-column justify-content-between">
+                    <h5>國際電話區號</h5>
+                    <div>
+                      <span v-for="(item, i) in country.callingCodes" :key="i">{{item}}
+                        <span v-if="i + 1 !== country.callingCodes.length">、</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="border-bottom-dotted h-100 d-flex flex-column justify-content-between">
+                    <h5>2位國家代碼</h5>
+                    <span>{{country.alpha2Code}}</span>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="border-bottom-dotted h-100 d-flex flex-column justify-content-between">
+                    <h5>3位國家代碼</h5>
+                    <span>{{country.alpha3Code}}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="row mb-3">
+                <div class="col-4">
+                  <div class="border-bottom-dotted h-100 d-flex flex-column justify-content-between">
+                    <h5>首都</h5>
+                    <span>{{country.capital}}</span>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="border-bottom-dotted h-100 d-flex flex-column justify-content-between">
+                    <h5>地區</h5>
+                    <span>{{country.region}}</span>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="border-bottom-dotted h-100 d-flex flex-column justify-content-between">
+                    <h5>亞區</h5>
+                    <span>{{country.subregion}}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="row mb-3">
+                <div class="col-4">
+                  <div class="border-bottom-dotted h-100 d-flex flex-column justify-content-between">
+                    <h5>人口</h5>
+                    <span>{{country.population}}</span>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="border-bottom-dotted h-100 d-flex flex-column justify-content-between">
+                    <h5>經緯度</h5>
+                    <span>{{country.latlng[0]}}, {{country.latlng[1]}}</span>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="border-bottom-dotted h-100 d-flex flex-column justify-content-between">
+                    <h5>區域居民稱謂</h5>
+                    <span>{{country.demonym}}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="row mb-3">
+                <div class="col-4">
+                  <div class="border-bottom-dotted h-100 d-flex flex-column justify-content-between">
+                    <h5>面積<small>(m2)</small></h5>
+                    <span>{{country.area}}</span>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="border-bottom-dotted h-100 d-flex flex-column justify-content-between">
+                    <h5>基尼係數</h5>
+                    <span>{{country.gini}}</span>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="border-bottom-dotted h-100 d-flex flex-column justify-content-between">
+                    <h5>數字碼</h5>
+                    <span>{{country.numericCode}}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="row mb-3">
+                <div class="col-6">
+                  <div class="border-bottom-dotted h-100 d-flex flex-column justify-content-between">
+                    <h5>時區</h5>
+                    <div>
+                      <span v-for="(item, i) in country.timezones" :key="i">{{item}}
+                        <span v-if="i + 1 !== country.timezones.length">、</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="border-bottom-dotted h-100 d-flex flex-column justify-content-between">
+                    <h5>邊界</h5>
+                    <div>
+                      <span v-for="(item, i) in country.borders" :key="i">{{item}}
+                        <span v-if="i + 1 !== country.borders.length">、</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row mb-3">
+                <div class="col-6">
+                  <div class="border-bottom-dotted h-100 d-flex flex-column justify-content-between">
+                    <h5>貨幣</h5>
+                    <div>
+                      <div v-for="(item, i) in country.currencies" class="mb-2">
+                        <span v-for="[key, value] of Object.entries(item)">
+                          {{key}}: {{value}}<br>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="border-bottom-dotted h-100 d-flex flex-column justify-content-between">
+                    <h5>語言</h5>
+                    <div>
+                      <div v-for="(item, i) in country.languages" class="mb-2">
+                        <span v-for="[key, value] of Object.entries(item)">
+                          {{key}}: {{value}}<br>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row mb-3">
+                <div class="col-6">
+                  <div class="border-bottom-dotted h-100 d-flex flex-column justify-content-between">
+                    <h5>翻譯</h5>
+                    <div>
+                      <div v-for="[key, value] of Object.entries(country.translations)" class="mb-2">
+                        <span>{{key}}: {{value}}<br></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="border-bottom-dotted h-100 d-flex flex-column justify-content-between">
+                    <h5>regionalBlocs</h5>
+                    <div>
+                      <div v-for="(item, i) in country.regionalBlocs" class="mb-2">
+                        <template v-for="[key, value] of Object.entries(item)">
+                          <template v-if="Array.isArray(value)">
+                            <span v-for="(content, i) in value" :key="i">{{content}}
+                              <span v-if="i + 1 !== value.length">、</span>
+                            </span>
+                          </template>
+                          <template v-else>
+                            {{key}}: {{value}}<br>
+                          </template>
+                        </template>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-          <div class="card">
-            <img src="..." class="card-img-top" alt="...">
-            <div class="card-body">
-              <h5 class="card-title">Card title</h5>
-              <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's
-                content.</p>
-              <a href="#" class="btn btn-primary">Go somewhere</a>
-            </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">關閉</button>
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </script>
+  <script type="text/x-template" id="pagination-component">
+    <nav v-if="paginationInfo.dataPage > 0"
+    class="mt-3 d-flex justify-content-center">
+      <ul class="pagination">
+        <li
+          class="page-item"
+          v-for="page in paginationInfo.dataPage"
+          :key="page"
+          :class="{ active: paginationInfo.currentPage === page - 1 }"
+        >
+          <a class="page-link" href="#" @click="changeData(page)">{{page}}</a>
+        </li>
+      </ul>
+    </nav>
+  </script>
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
     integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
     crossorigin="anonymous"></script>
@@ -54,7 +314,6 @@
     integrity="sha384-Piv4xVNRyMGpqkS2by6br4gNJ7DXjqk09RmUpJ8jgGtD7zP9yug3goQfGII0yAns"
     crossorigin="anonymous"></script>
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-  <script src="js/jquery-3.1.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
   <script src="js/all.js"></script>
 </body>
